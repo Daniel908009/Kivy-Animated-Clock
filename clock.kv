@@ -1,0 +1,40 @@
+<MainGrid>
+    time: None
+    id: mainGrid
+    type: "currentTime" # later there will be more types
+    clockEvent: None
+    radius: 0
+    centerX: 0
+    centerY: 0
+    mainColor: (1,1,1,1)
+    mainBackgroundColor: (0,0,0,1)
+    handColors: [(1,0,0,1), (0,1,0,1), (0,0,1,1)]
+    secondAngle: 0
+    minuteAngle: 0
+    hourAngle: 0
+    on_kv_post: root.resize()
+    on_size: root.resize()
+    Label:
+        id: mainLabel
+        text: "Clock"
+        font_size: 30
+        size_hint_y: None
+        size_hint: (1, 0.1)
+        pos_hint: {"center_x": 0.5, "center_y": 0.95}
+    BoxLayout:
+        size_hint_y: None
+        size_hint: (0.5, 0.8)
+        id: canvast
+    GridLayout:
+        cols: 2
+        size_hint_y: None
+        size_hint: (1, 0.1)
+        pos_hint: {"center_x": 0.5, "center_y": 0.05}
+        Button:
+            text: "Change type of clock/settings"
+            on_press: root.change_type()
+        Button:
+            id: startStopButton
+            text: "Start"
+            background_color: (0,1,0,1)
+            on_press: root.startStop()
