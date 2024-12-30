@@ -5,6 +5,8 @@ from kivy.uix.effectwidget import Rectangle
 from kivy.uix.label import CoreLabel
 from kivy.uix.popup import Popup
 from kivy.clock import Clock
+from kivy.uix.label import Label
+from kivy.uix.button import Button
 import time
 import math
 
@@ -22,7 +24,6 @@ class ColorPopup(Popup):
             self.ids.colorPicker.color = self.caller.numbersColor
         elif color == "second":
             self.ids.colorPicker.color = self.caller.handColors[0]
-            print("setting second color")
         elif color == "minute":
             self.ids.colorPicker.color = self.caller.handColors[1]
         elif color == "hour":
@@ -35,14 +36,25 @@ class ColorPopup(Popup):
         elif self.color == "number":
             self.caller.numbersColor = (self.ids.colorPicker.color[0], self.ids.colorPicker.color[1], self.ids.colorPicker.color[2], self.ids.colorPicker.color[3])
         elif self.color == "second":
-            print(self.ids.colorPicker.color)
-            #print("here ", self.caller.name)
             self.caller.handColors[0] = (self.ids.colorPicker.color[0], self.ids.colorPicker.color[1], self.ids.colorPicker.color[2], self.ids.colorPicker.color[3])
-            print("second color set" , self.caller.handColors[0])
         elif self.color == "minute":
             self.caller.handColors[1] = (self.ids.colorPicker.color[0], self.ids.colorPicker.color[1], self.ids.colorPicker.color[2], self.ids.colorPicker.color[3])
         elif self.color == "hour":
             self.caller.handColors[2] = (self.ids.colorPicker.color[0], self.ids.colorPicker.color[1], self.ids.colorPicker.color[2], self.ids.colorPicker.color[3])
+        self.dismiss()
+
+class TimerPopup(Popup):
+    def __init__(self, caller):
+        super(TimerPopup, self).__init__()
+        self.caller = caller
+    def apply(self):
+        if self.ids.hours.text == "":
+            self.ids.hours.text = "0"
+        if self.ids.minutes.text == "":
+            self.ids.minutes.text = "0"
+        if self.ids.seconds.text == "":
+            self.ids.seconds.text = "0"
+        self.caller.destinationTime = int(self.ids.hours.text) * 3600 + int(self.ids.minutes.text) * 60 + int(self.ids.seconds.text)
         self.dismiss()
 
 class SettingsPopup(Popup):
@@ -57,6 +69,7 @@ class SettingsPopup(Popup):
         self.mainBackgroundColor = self.caller.mainBackgroundColor
         self.numbersColor = self.caller.numbersColor
         self.handColors = self.caller.handColors
+        self.timeSetting()
     def save_settings(self):
         self.caller.type = self.ids.typeSpinner.text
         self.caller.design[0] = self.ids.firstUICheckBox.active
@@ -65,14 +78,28 @@ class SettingsPopup(Popup):
         self.caller.mainColor = self.mainColor
         self.caller.mainBackgroundColor = self.mainBackgroundColor
         self.caller.handColors = self.handColors
+        if self.ids.typeSpinner.text == "Timer":
+            a = self.destinationTime
+            if a == 0 or a == None:
+                a = 1
+            self.caller.time = a
         self.caller.setup()
-        print("here")
         self.dismiss()
+    def timeSetting(self):
+        self.ids.timeGrid.clear_widgets()
+        if self.ids.typeSpinner.text == "Clock":
+            self.ids.timeGrid.add_widget(Label(text="Automatic"))
+        elif self.ids.typeSpinner.text == "Timer":
+            self.ids.timeGrid.add_widget(Button(text="Set Time",on_press=self.setTimer, background_color=(1, 0, 0, 1)))
+        elif self.ids.typeSpinner.text == "Stopwatch":
+            self.ids.timeGrid.add_widget(Label(text="None"))
+    def setTimer(self, instance):
+        popup = TimerPopup(self)
+        popup.open()
     def pick_color(self, color):
         popup = ColorPopup(self, color)
         popup.open()
     def close(self):
-        print(self.handColors)
         self.dismiss()
 
 class MainGrid(FloatLayout):
@@ -89,6 +116,11 @@ class MainGrid(FloatLayout):
             self.ids.startStopButton.text = "Start"
             self.ids.startStopButton.background_color = (0, 1, 0, 1)
             self.ids.startStopButton.disabled = False
+            if self.type != "Timer":
+                self.time = 0
+            self.getAngles()
+            self.drawClock()
+            self.drawHands()
     def startStop(self):
         if self.ids.startStopButton.text == "Start":
             self.ids.startStopButton.text = "Stop"
@@ -112,9 +144,11 @@ class MainGrid(FloatLayout):
         self.getAngles()
         self.drawClock()
         self.drawHands()
+        if self.type == "Timer":
+            if self.time <= 0:
+                self.startStop()
     def getAngles(self):
         if self.type == "Clock":
-            print(self.time.tm_sec, self.time.tm_min, self.time.tm_hour)
             # getting the second angle
             self.secondAngle = 6 * self.time.tm_sec * -1 + 90
             # getting the minute angle
@@ -122,17 +156,21 @@ class MainGrid(FloatLayout):
             # getting the hour angle
             self.hourAngle = (30 * self.time.tm_hour + self.time.tm_min / 2 - 90) * -1
         else:
+            hours, minutes = divmod(self.time, 3600)
+            minutes, seconds = divmod(minutes, 60)
             # getting the second angle
-            self.secondAngle = 6 * self.time
+            self.secondAngle = seconds * -6 + 90
             # getting the minute angle
-            self.minuteAngle = self.time / 10
+            self.minuteAngle = minutes * -6 + 90
             # getting the hour angle
-            self.hourAngle = self.time / 2
+            self.hourAngle = hours * -30 + 90
     def getTime(self):
         if self.type == "Clock":
             self.time = time.localtime()
-        else:
+        elif self.type == "Stopwatch":
             self.time += 1
+        elif self.type == "Timer":
+            self.time -= 1
     def drawClock(self):
         self.ids.canvast.canvas.clear()
         # drawing the outer clock circle
@@ -150,29 +188,48 @@ class MainGrid(FloatLayout):
                 y2 = self.centerY + (self.radius + 5) * math.sin(angle)
                 self.ids.canvast.canvas.add(Line(points=[x1, y1, x2, y2], width=2))
         # drawing the numbers
-        if self.design[2]:
-            for i in range(12):
-                number = i + 9
-                if number > 12:
-                    textNumber = number - 12
-                elif number == 12:
-                    textNumber = 0
-                else:
-                    textNumber = number
-                answer = 12 - textNumber
-                text = CoreLabel(text=str(answer), font_size=25, color=(self.numbersColor[0], self.numbersColor[1], self.numbersColor[2], self.numbersColor[3]))
-                text.refresh()
-                texture = text.texture
-                texture_size = list(texture.size)
-                x = self.centerX + (self.radius+25) * math.cos(math.radians(i * 30)) - texture_size[0] / 2
-                y = self.centerY + (self.radius+25) * math.sin(math.radians(i * 30)) - texture_size[1] / 2
-                self.ids.canvast.canvas.add(Rectangle(texture=texture, pos=(x, y), size=texture_size))
+        if self.design[2] and self.type == "Clock": # in case it is a clock
+            self.drawNumHours()
+        elif self.design[2]: # in case it is a timer or a stopwatch it will change the numbers dynamicaly based on the time left
+            hours, minutes = divmod(self.time, 3600)
+            minutes, seconds = divmod(minutes, 60)
+            if hours > 0: # this will display the same thing as if its a clock
+                self.drawNumHours()
+            else: # this will draw increments of 5 instead of the hours
+                for i in range(12):
+                    num = i*5
+                    num = 60 - num
+                    if num == 0:
+                        num = 60
+                    text = CoreLabel(text=str(num), font_size=25, color=(self.numbersColor[0], self.numbersColor[1], self.numbersColor[2], self.numbersColor[3]))
+                    text.refresh()
+                    texture = text.texture
+                    texture_size = list(texture.size)
+                    x = self.centerX + (self.radius+25) * math.cos(math.radians((i+3) * 30)) - texture_size[0] / 2
+                    y = self.centerY + (self.radius+25) * math.sin(math.radians((i+3) * 30)) - texture_size[1] / 2
+                    self.ids.canvast.canvas.add(Rectangle(texture=texture, pos=(x, y), size=texture_size))
         # drawing the inner clock circle
         self.ids.canvast.canvas.add(Color(self.mainBackgroundColor[0], self.mainBackgroundColor[1], self.mainBackgroundColor[2],self.mainBackgroundColor[3]))
         self.ids.canvast.canvas.add(Ellipse(pos=(self.centerX - self.radius + 10, self.centerY - self.radius + 10), size=(self.radius * 2 - 20, self.radius * 2 - 20)))
+    def drawNumHours(self):
+        for i in range(12):
+            number = i + 9
+            if number > 12:
+                textNumber = number - 12
+            elif number == 12:
+                textNumber = 0
+            else:
+                textNumber = number
+            answer = 12 - textNumber
+            text = CoreLabel(text=str(answer), font_size=25, color=(self.numbersColor[0], self.numbersColor[1], self.numbersColor[2], self.numbersColor[3]))
+            text.refresh()
+            texture = text.texture
+            texture_size = list(texture.size)
+            x = self.centerX + (self.radius+25) * math.cos(math.radians(i * 30)) - texture_size[0] / 2
+            y = self.centerY + (self.radius+25) * math.sin(math.radians(i * 30)) - texture_size[1] / 2
+            self.ids.canvast.canvas.add(Rectangle(texture=texture, pos=(x, y), size=texture_size))
     def drawHands(self):
         # drawing the seconds hand
-        print(self.handColors[0])
         self.ids.canvast.canvas.add(Color(self.handColors[0][0], self.handColors[0][1], self.handColors[0][2],self.handColors[0][3]))
         self.ids.canvast.canvas.add(Line(points=[self.centerX, self.centerY, self.centerX + self.radius * 0.9 * math.cos(math.radians(self.secondAngle)), self.centerY + self.radius * 0.9 * math.sin(math.radians(self.secondAngle))], width=1))
         # drawing the minute hand

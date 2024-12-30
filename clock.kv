@@ -1,7 +1,7 @@
 <MainGrid>
     time: None
     id: mainGrid
-    type: "Clock" # later there will be more types
+    type: "Clock"
     clockEvent: None
     radius: 0
     centerX: 0
@@ -49,6 +49,7 @@
     mainBackgroundColor: []
     numbersColor: []
     handColors: []
+    destinationTime: None
     BoxLayout:
         orientation: 'vertical'
         Label:
@@ -66,6 +67,12 @@
             Spinner:
                 id: typeSpinner
                 values: ["Clock", "Timer", "Stopwatch"]
+                on_text: root.timeSetting()
+            Label:
+                text: 'Time:'
+            GridLayout:
+                cols: 1
+                id: timeGrid
             Label:
                 text: 'Main color'
             Button:
@@ -117,7 +124,7 @@
             size_hint: (1, 0.2)
             Button:
                 text: 'Cancel'
-                on_press: root.close() # there is a bug with one of the variables, so I have to close it manually to check what is wrong
+                on_press: root.close() # there was a bug with one of the variables, so I had to close it manually to check what is wrong
             Button:
                 text: 'Save'
                 background_color: (0,1,0,1)
@@ -151,3 +158,49 @@
                 text: 'Save'
                 background_color: (0,1,0,1)
                 on_press: root.save_color()
+
+<TimerPopup>
+    title: 'Set time'
+    size_hint: (0.5, 0.5)
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        Label:
+            text: 'Set time'
+            font_size: 30
+            size_hint_y: None
+            size_hint: (1, 0.2)
+        GridLayout:
+            cols: 2
+            size_hint_y: None
+            size_hint: (1, 0.5)
+            Label:
+                text: 'Hours'
+            TextInput:
+                id: hours
+                input_filter: 'int'
+                hint_text: "Enter hours"
+            Label:
+                text: 'Minutes'
+            TextInput:
+                id: minutes
+                input_filter: 'int'
+                hint_text: "Enter minutes"
+            Label:
+                text: 'Seconds'
+            TextInput:
+                id: seconds
+                input_filter: 'int'
+                hint_text: "Enter seconds"
+        GridLayout:
+            cols: 2
+            size_hint_y: None
+            size_hint: (1, 0.2)
+            Button:
+                text: 'Cancel'
+                on_press: root.dismiss()
+            Button:
+                text: 'Save'
+                background_color: (0,1,0,1)
+                on_press: root.apply()
