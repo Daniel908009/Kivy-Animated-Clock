@@ -6,10 +6,12 @@
 - Timer, this basically sets the clock to the inputed time and the clock goes backwards until it reaches zero hours/minutes/seconds.
 - Stopwatch, this works exactly as you would expect
 <p>The clock it self is fully custumizable, see settings image bellow.</p>
+
 ![image](https://github.com/user-attachments/assets/ba09ddec-ff3f-4dae-8ebf-e887eb13a0e1)
 
 ## Screenshots
 <p>Here are some images of what you can do with it.</p>
+
 ![image](https://github.com/user-attachments/assets/905cb239-d471-4d09-9551-c9be291b4436)
 ![image](https://github.com/user-attachments/assets/efd86310-a93b-4966-b7b3-137c89c57acb)
 ![image](https://github.com/user-attachments/assets/e0fed30e-6b2a-42d3-bf1c-490b97ca3e96)
@@ -25,6 +27,7 @@
 <p>The copy button is at the top of the page, see image bellow.</p>
 
 ![image](https://github.com/user-attachments/assets/3b852bc1-4947-452c-a381-15e4beb35aa9)
+
 <p>*Note this image is from a different repo, however the place of the copy button is exactly the same</p>
 <p>After the instalation is done, you can run the package by typing this command: kivy_animated_clock_package</p>
 <p>In case this explanation isnt clear to you, please write it to the HighSeas feedback AI(the why did you vote for x input bar) or write it to me directly through the contact on Slack link. Any feedback is appreciated!</p>
