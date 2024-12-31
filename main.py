@@ -1,3 +1,4 @@
+from kivy.uix.screenmanager import Scale
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import Color, Ellipse, Line
@@ -130,8 +131,22 @@ class MainGrid(FloatLayout):
             self.ids.startStopButton.text = "Start"
             self.ids.startStopButton.background_color = (0, 1, 0, 1)
             self.clockEvent.cancel()
+            if self.type == "Stopwatch":
+                hours, minutes = divmod(self.time, 3600)
+                minutes, seconds = divmod(minutes, 60)
+                timeText = str(hours) + ":" + str(minutes) + ":" + str(seconds)
+                popup = Popup(title="Stopwatch", content=Label(text="Time stopped at: " + timeText), size_hint=(0.5, 0.5))
+                popup.open()
+                self.time = 0
+                self.getAngles()
+                self.drawClock()
+                self.drawHands()
     def resize(self):
-        self.radius = self.size[0] / 4
+        radius1 = self.size[0] / 4
+        radius2 = self.size[1] / 4
+        self.radius = radius2
+        if radius1 < radius2:
+            self.radius = radius1
         self.centerX = self.size[0] / 2
         self.centerY = self.size[1] / 2
         self.drawClock()
@@ -146,6 +161,8 @@ class MainGrid(FloatLayout):
         self.drawHands()
         if self.type == "Timer":
             if self.time <= 0:
+                popup = Popup(title='Time is up!', content=Label(text='Time is up!'), size_hint=(0.5, 0.5))
+                popup.open()
                 self.startStop()
     def getAngles(self):
         if self.type == "Clock":
