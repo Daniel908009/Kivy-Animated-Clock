@@ -3,7 +3,7 @@
 
 ## What does the app contain?
 - Live clock showing the time set on your computer
-- Timer, this basically sets the clock to the inputed time and the clock goes backwards until it reaches zero hours/minutes/seconds.
+- Timer, this basically sets the clock to the inputed time and then the clock goes backwards until it reaches zero hours/minutes/seconds.
 - Stopwatch, this works exactly as you would expect
 <p>The clock it self is fully custumizable, see settings image bellow.</p>
 
